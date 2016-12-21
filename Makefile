@@ -8,6 +8,7 @@ build:
 	docker run --privileged --name live_builder -it \
 		-v ${ROOT_DIR}/scripts:/scripts \
 		-v ${ROOT_DIR}/tftp:/tftp debian:jessie-slim /scripts/build.sh;
+	docker rm -f live_builder;
 
 start:
 	@echo "Starting up virtualized test"
