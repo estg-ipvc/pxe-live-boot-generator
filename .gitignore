@@ -1,0 +1,4 @@
+# Exclude the gerenated boot images
+tftp/vmlinuz
+tftp/initrd.img
+tftp/filesystem.squashfs
