@@ -5,7 +5,8 @@ all: build start
 
 build:
 	@echo "building"
-	docker run --name live_builder -it -v ${ROOT_DIR}/scripts:/scripts \
+	docker run --privileged --name live_builder -it \
+		-v ${ROOT_DIR}/scripts:/scripts \
 		-v ${ROOT_DIR}/tftp:/tftp debian:jessie-slim /scripts/build.sh;
 
 start:
