@@ -150,6 +150,7 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 
+sleep 5
 sudo systemctl enable qemu
 sudo systemctl start qemu
 
