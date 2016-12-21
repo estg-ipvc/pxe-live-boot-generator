@@ -13,6 +13,7 @@ apt-get install -y ${BUILD_DEPS}
 
 debootstrap --variant=minbase --arch=i386 --include=$PACKAGES jessie "${WORK_DIR}" http://httpredir.debian.org/debian
 
+## Post debootstrap customization
 # Clean up file with misleading information from host
 rm "${WORK_DIR}/etc/hostname"
 
@@ -26,10 +27,6 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
 EOF
-cat >>"${WORK_DIR}/etc/resolv.conf" <<'EOF'
-nameserver 8.8.8.8
-nameserver 8.8.4.4
-EOF
 
 # Implement insecurity
 chroot "${WORK_DIR}" passwd -d root # remove password on root account
@@ -40,6 +37,7 @@ sed -i 's/PermitEmptyPasswords no/PermitEmptyPasswords yes/' "${WORK_DIR}/etc/ss
 # Clean up temporary files
 rm -rf "${WORK_DIR}"/var/cache/apt/*
 rm -rf "${WORK_DIR}"/tmp/*
+
 # Build the root filesystem image, and extract the accompanying kernel and initramfs
 mksquashfs "${WORK_DIR}" sqashfs.new -noappend; mv sqashfs.new /tftp/filesystem.squashfs
 

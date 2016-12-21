@@ -6,7 +6,7 @@ echo "Starting Provisioning..."
 sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" | sudo tee /etc/apt/sources.list.d/docker.list
 sudo apt-get update
-#sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y
+sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y
 sudo apt-get install -y qemu apt-transport-https ca-certificates bridge-utils uml-utilities \
   linux-image-extra-$(uname -r) linux-image-extra-virtual docker-engine
 sudo apt-get clean
@@ -43,6 +43,10 @@ log-facility local7;
 
 subnet 10.0.0.0 netmask 255.255.255.0 {
     range 10.0.0.10 10.0.0.200;
+    option routers 10.0.0.1;
+    option domain-name-servers 8.8.8.8, 8.8.4.4;
+    option broadcast-address 10.0.0.255;
+    option subnet-mask 255.255.255.0;
     filename "pxelinux.0";
 }
 EOF
@@ -72,10 +76,7 @@ EOF
 sudo systemctl enable dhcp-server
 sudo systemctl start dhcp-server
 
-# Prepare tftp dir
-mkdir /tftp
-cp -Rv /vagrant/tftp/* /tftp
-chmod -R 755 /tftp
+# Regenerate /tftp directory and add internet connection to tap0 on each boot
 
 cat << EOF | sudo tee /etc/rc.local
 #!/bin/sh -e
@@ -90,10 +91,18 @@ cat << EOF | sudo tee /etc/rc.local
 # bits.
 #
 # By default this script does nothing.
-rm -Rf /tftp
-mkdir /tftp
-cp -Rv /vagrant/tftp/* /tftp
-chmod -R 755 /tftp
+
+# Wait a while so the /vagrant mount is available
+sleep 8
+systemctl restart tftp-hpa
+
+## Provide internet to the tap0 interface
+# get the default interface
+IFACE=\$(route | grep '^default' | grep -o '[^ ]*$')
+# enable nat
+iptables -t nat -A POSTROUTING -o \${IFACE} -j MASQUERADE
+# enable ipv4_forwarding
+echo '1' > /proc/sys/net/ipv4/ip_forward
 
 exit 0
 EOF
@@ -113,10 +122,10 @@ ExecStartPre=/bin/bash -c '/usr/bin/docker inspect %n &> /dev/null && /usr/bin/d
 ExecStart=/usr/bin/docker run \
   --name %n \
   -p 69:69/udp \
-  -v /tftp/pxelinux.cfg:/tftpboot/pxelinux.cfg:ro \
-  -v /tftp/initrd.img:/tftpboot/initrd.img:ro \
-  -v /tftp/vmlinuz:/tftpboot/vmlinuz:ro \
-  -v /tftp/filesystem.squashfs:/tftpboot/filesystem.squashfs:ro \
+  -v /vagrant/tftp/pxelinux.cfg:/tftpboot/pxelinux.cfg:ro \
+  -v /vagrant/tftp/initrd.img:/tftpboot/initrd.img:ro \
+  -v /vagrant/tftp/vmlinuz:/tftpboot/vmlinuz:ro \
+  -v /vagrant/tftp/filesystem.squashfs:/tftpboot/filesystem.squashfs:ro \
   jumanjiman/tftp-hpa:latest
 ExecStop=/usr/bin/docker stop %n
 RestartSec=5s
@@ -150,7 +159,10 @@ Restart=always
 WantedBy=multi-user.target
 EOF
 
-sleep 5
+# Run rc.local to take effect on the first boot
+/bin/bash /etc/rc.local
+
+# Start qemu
 sudo systemctl enable qemu
 sudo systemctl start qemu
 

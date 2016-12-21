@@ -5,4 +5,4 @@ timeout 2
 LABEL Debian
 KERNEL vmlinuz
 INITRD initrd.img
-APPEND ip=dhcp boot=live fetch=tftp://10.0.0.1/filesystem.squashfs
+APPEND boot=live fetch=tftp://10.0.0.1/filesystem.squashfs
