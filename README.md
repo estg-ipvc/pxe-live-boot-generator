@@ -1,6 +1,6 @@
-# PXE Debian Live Boot
+# PXE Live Boot Generator
 
-A PXE Debian Live Boot generator with testing tools
+Debian image files generator with test and simulation tools for PXE Booting environments.
 
 ## Description
 
