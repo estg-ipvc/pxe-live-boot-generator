@@ -1,16 +1,15 @@
 #!/bin/bash
 
-BUILD_DEPS="debootstrap"
+BUILD_DEPS="debootstrap squashfs-tools"
 PACKAGES="ifupdown,ifupdown-extra,isc-dhcp-client,openssh-server,less,nano,picocom,htop"
 
 set -e
 
 WORK_DIR="/build"
 mkdir "${WORK_DIR}"
-trap 'rm -rf "${WORK_DIR}"' EXIT
 
 apt-get update
-apt-get install -y "${BUILD_DEPS}"
+apt-get install -y ${BUILD_DEPS}
 
 debootstrap --variant=minbase --arch=i386 --include=$PACKAGES jessie "${WORK_DIR}" http://httpredir.debian.org/debian
 
@@ -44,6 +43,6 @@ rm -rf "${WORK_DIR}"/tmp/*
 # Build the root filesystem image, and extract the accompanying kernel and initramfs
 mksquashfs "${WORK_DIR}" sqashfs.new -noappend; mv sqashfs.new /tftp/filesystem.squashfs
 
-chroot "${WORK_DIR}" apt install -y linux-image-586 live-boot live-boot-initramfs-tools
+chroot "${WORK_DIR}" apt-get install -y linux-image-586 live-boot live-boot-initramfs-tools
 cp -p "${WORK_DIR}/boot"/vmlinuz-* vmlinuz.new; mv vmlinuz.new /tftp/vmlinuz
 cp -p "${WORK_DIR}/boot"/initrd.img-* initrd.new; mv initrd.new /tftp/initrd.img
