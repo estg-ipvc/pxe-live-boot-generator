@@ -6,6 +6,12 @@ A PXE Debian Live Boot generator with testing tools
 
 Soon...
 
+## Requirements
+
+-   make
+-   Docker
+-   Vagrant and a VM Hypervisor (Virtualbox, Parallels, VMWare)
+
 ## Generating boot images
 
 Build the squashfs root (`filesystem.squashfs`), linux image (`vmlinuz`) and initramfs (`initrd.img`):
