@@ -2,3 +2,6 @@
 tftp/vmlinuz
 tftp/initrd.img
 tftp/filesystem.squashfs
+
+# Exclude Vagrant files
+.vagrant
