@@ -19,11 +19,13 @@ stop:
 	vagrant halt;
 
 destroy:
-	vagrant down;
+	vagrant halt;
 	vagrant destroy -f;
 
 clean:
 	@echo "Cleaning...";
+	vagrant halt;
+	vagrant destroy -f;
 	rm -Rf .vagrant;
 	rm -Rf .cache;
 	rm -Rf tftp/vmlinuz tftp/initrd.img tftp/filesystem.squashfs;
