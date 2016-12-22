@@ -19,6 +19,7 @@ stop:
 	vagrant halt;
 
 destroy:
+	vagrant down;
 	vagrant destroy -f;
 
 clean:
