@@ -7,28 +7,18 @@ sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-keys 581
 echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" | sudo tee /etc/apt/sources.list.d/docker.list
 sudo apt-get update
 sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y
-sudo apt-get install -y qemu apt-transport-https ca-certificates bridge-utils uml-utilities \
+sudo apt-get install -y qemu apt-transport-https ca-certificates \
   linux-image-extra-$(uname -r) linux-image-extra-virtual docker-engine
 sudo apt-get clean
-echo "UML_SWITCH_OPTIONS="-tap tap0"" | sudo tee --append /etc/default/uml-utilities
 
-sudo adduser vagrant uml-net
 cat << EOF | sudo tee --append /etc/network/interfaces
 
 auto tap0
 iface tap0 inet manual
-  tunctl_user uml-net
-  up ifconfig tap0 promisc arp 0.0.0.0 up
-
-auto virtbr0
-iface virtbr0 inet static
-  bridge_ports tap0
-  bridge_stp off
-  bridge_maxwait 5
-  address 10.0.0.1
-  netmask 255.255.255.0
-  network 10.0.0.0
-  broadcast 10.0.0.255
+  pre-up ip tuntap add tap0 mode tap user root
+  pre-up ip addr add 10.0.0.1/24 dev tap0
+  up ip link set dev tap0 up
+  post-down ip link del dev tap0
 
 EOF
 
@@ -63,8 +53,7 @@ ExecStart=/usr/bin/docker run \
   --name %n \
   --net=host \
   -v /etc/dhcp:/data \
-  networkboot/dhcpd:latest \
-  virtbr0
+  networkboot/dhcpd:latest tap0
 ExecStop=/usr/bin/docker stop %n && /usr/bin/docker rm %n
 RestartSec=5s
 Restart=always
@@ -162,7 +151,8 @@ EOF
 # Run rc.local to take effect on the first boot
 /bin/bash /etc/rc.local
 
-# Start qemu
+# Wait a while and start qemu
+sleep 5
 sudo systemctl enable qemu
 sudo systemctl start qemu
 
