@@ -7,11 +7,8 @@ Vagrant.configure(2) do |config|
 	## $ vagrant plugin install vagrant-vbguest
 	##
 	## Uncomment the following, replacing the existing the existing one:
-	##
 	#config.vm.box = "ubuntu/xenial64"
 	#config.vm.box_check_update = true
-  #	Set your guest specs here
- 	# Replace the provider with your own, for example:
  	#config.vm.provider "virtualbox" do |v|
 	# 	v.update_guest_tools = true
 	# 	v.memory = 1024
@@ -26,10 +23,6 @@ Vagrant.configure(2) do |config|
 	##
 	config.vm.box = "parallels/ubuntu-16.04"
 	config.vm.box_check_update = true
-
-	# Set your guest specs here
-	# Replace the provider with your own, for example:
-	#config.vm.provider "virtualbox" do |v|
 	config.vm.provider "parallels" do |v|
 		v.update_guest_tools = true
 		v.memory = 1024
