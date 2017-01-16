@@ -1,7 +1,11 @@
-# Exclude the gerenated boot images
+# gerenated boot images
 tftp/vmlinuz
 tftp/initrd.img
 tftp/filesystem.squashfs
 
-# Exclude Vagrant files
+# Vagrant stuff
 .vagrant
+
+# Vim & Friends stuff
+.cache
+
