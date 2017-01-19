@@ -1,0 +1,11 @@
+# gerenated boot images
+tftp/vmlinuz
+tftp/initrd.img
+tftp/filesystem.squashfs
+
+# Vagrant stuff
+.vagrant
+
+# Vim & Friends stuff
+.cache
+

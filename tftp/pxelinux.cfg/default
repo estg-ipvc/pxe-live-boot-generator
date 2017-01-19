@@ -1,0 +1,8 @@
+default Debian
+prompt 1
+timeout 2
+
+LABEL Debian
+KERNEL vmlinuz
+INITRD initrd.img
+APPEND boot=live fetch=tftp://10.0.0.1/filesystem.squashfs
